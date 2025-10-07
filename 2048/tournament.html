@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Director - Professional Tournament Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        body.dark-mode .bg-white {
+            background-color: #2d3748 !important;
+        }
+        
+        body.dark-mode .bg-gray-50 {
+            background-color: #1a202c !important;
+        }
+        
+        body.dark-mode .text-gray-900 {
+            color: #f7fafc !important;
+        }
+        
+        body.dark-mode .text-gray-700 {
+            color: #e2e8f0 !important;
+        }
+        
+        body.dark-mode .text-gray-600 {
+            color: #cbd5e0 !important;
+        }
+        
+        body.dark-mode .text-gray-500 {
+            color: #a0aec0 !important;
+        }
+        
+        body.dark-mode .border-gray-200 {
+            border-color: #4a5568 !important;
+        }
+        
+        body.dark-mode .border-gray-300 {
+            border-color: #4a5568 !important;
+        }
+        
+        body.dark-mode .bg-gray-100 {
+            background-color: #374151 !important;
+        }
+        
+        body.dark-mode .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        body.dark-mode .shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        body.dark-mode .nav-item:hover {
+            background-color: #374151;
+        }
+        
+        body.dark-mode input,
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background-color: #374151;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        
+        body.dark-mode input::placeholder,
+        body.dark-mode textarea::placeholder {
+            color: #a0aec0;
+        }
+        
+        .bracket-line {
+            border: 2px solid #e5e7eb;
+        }
+        
+        body.dark-mode .bracket-line {
+            border-color: #4a5568;
+        }
+        
+        .match-card {
+            transition: all 0.3s ease;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        body.dark-mode .match-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .nav-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .bracket-connector {
+            position: relative;
+        }
+        
+        .bracket-connector::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background: #e5e7eb;
+            left: 100%;
+            top: 50%;
+        }
+        
+        body.dark-mode .bracket-connector::before {
+            background: #4a5568;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-trophy text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">Tournament Director</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleDarkMode()" class="text-gray-600 hover:text-gray-900" title="Toggle Dark Mode">
+                        <i id="darkModeIcon" class="fas fa-moon text-xl"></i>
+                    </button>
+                    <button class="text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-bell text-xl"></i>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <div class="text-right">
+                            <div id="userNameDisplay" class="text-sm font-medium text-gray-700"></div>
+                            <div id="userRoleDisplay" class="text-xs text-gray-500"></div>
+                        </div>
+                        <button onclick="handleLogout()" class="text-gray-600 hover:text-gray-900" title="Logout">
+                            <i class="fas fa-sign-out-alt text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg">
+            <nav class="mt-5 px-2">
+                <a href="#" class="nav-item active group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1" onclick="showSection('dashboard')">
+                    <i class="fas fa-home mr-3 text-lg"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('tournaments')">
+                    <i class="fas fa-trophy mr-3 text-lg"></i>
+                    Tournaments
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('brackets')">
+                    <i class="fas fa-sitemap mr-3 text-lg"></i>
+                    Brackets
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('scheduling')">
+                    <i class="fas fa-calendar-alt mr-3 text-lg"></i>
+                    Auto Schedule
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('lanes')">
+                    <i class="fas fa-layer-group mr-3 text-lg"></i>
+                    Lane Assignment
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('prizes')">
+                    <i class="fas fa-medal mr-3 text-lg"></i>
+                    Prize Distribution
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('sponsors')">
+                    <i class="fas fa-handshake mr-3 text-lg"></i>
+                    Sponsors & Contracts
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('bowlerDatabase')">
+                    <i class="fas fa-database mr-3 text-lg"></i>
+                    Bowler Database
+                </a>
+                <a href="#" id="myRegistrationsNav" class="nav-item group flex items-center px-4 py-3 text-sm font-medium rounded-md mb-1 text-gray-700" onclick="showSection('myRegistrations')" style="display: none;">
+                    <i class="fas fa-clipboard-list mr-3 text-lg"></i>
+                    My Registrations
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Dashboard</h2>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                                <i class="fas fa-trophy text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">Active Tournaments</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="activeTournaments">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                                <i class="fas fa-users text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">Total Participants</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="totalParticipants">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                                <i class="fas fa-calendar-check text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">Scheduled Matches</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="scheduledMatches">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                                <i class="fas fa-handshake text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">Active Sponsors</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="activeSponsors">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="recentActivity" class="space-y-4">
+                            <p class="text-gray-500 text-center py-8">No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tournaments Section -->
+            <div id="tournaments" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900">Tournaments</h2>
+                    <button onclick="showCreateTournamentModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>Create Tournament
+                    </button>
+                </div>
+                
+                <div id="tournamentsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Tournaments will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Brackets Section -->
+            <div id="brackets" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900">Tournament Brackets</h2>
+                    <div class="flex space-x-3">
+                        <select id="bracketTournamentSelect" class="border border-gray-300 rounded-lg px-4 py-2" onchange="loadBracket()">
+                            <option value="">Select Tournament</option>
+                        </select>
+                        <button onclick="autoSeedBracket()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-magic mr-2"></i>Auto-Seed
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="bracketView" class="bg-white rounded-lg shadow p-6 overflow-x-auto">
+                    <p class="text-gray-500 text-center py-8">Select a tournament to view brackets</p>
+                </div>
+            </div>
+
+            <!-- Scheduling Section -->
+            <div id="scheduling" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900">Auto Schedule</h2>
+                    <button onclick="generateSchedule()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-calendar-plus mr-2"></i>Generate Schedule
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">Schedule Settings</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tournament</label>
+                            <select id="scheduleTournamentSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                                <option value="">Select Tournament</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                            <input type="date" id="scheduleStartDate" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Match Duration (min)</label>
+                            <input type="number" id="matchDuration" value="30" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="scheduleView" class="bg-white rounded-lg shadow p-6">
+                    <div id="scheduleContent">
+                        <p class="text-gray-500 text-center py-8">Configure settings and generate schedule</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lane Assignment Section -->
+            <div id="lanes" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900">Lane Assignment</h2>
+                    <button onclick="autoAssignLanes()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-random mr-2"></i>Auto-Assign Lanes
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">Lane Configuration</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Lanes</label>
+                            <input type="number" id="totalLanes" value="8" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tournament</label>
+                            <select id="laneTournamentSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                                <option value="">Select Tournament</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Method</label>
+                            <select id="laneAssignmentMethod" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                                <option value="random">Random</option>
+                                <option value="sequential">Sequential</option>
+                                <option value="balanced">Balanced</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="laneAssignmentView" class="bg-white rounded-lg shadow p-6">
+                    <div id="laneContent">
+                        <p class="text-gray-500 text-center py-8">Configure lanes and assign matches</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prize Distribution Section -->
+            <div id="prizes" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900">Prize Distribution</h2>
+                    <button onclick="showPrizeModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>Add Prize Pool
+                    </button>
+                </div>
+                
+                <div id="prizesList" class="space-y-6">
+                    <!-- Prize pools will be added here -->
+                </div>
+            </div>
+
+            <!-- Sponsors Section -->
+            <div id="sponsors" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900">Sponsors & Contracts</h2>
+                    <button onclick="showSponsorModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                        <i class="fas fa-plus mr-2"></i>Add Sponsor
+                    </button>
+                </div>
+                
+                <div id="sponsorsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Sponsors will be added here -->
+                </div>
+            </div>
+
+            <!-- Bowler Database Section -->
+            <div id="bowlerDatabase" class="section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900">Bowler Database</h2>
+                    <div class="flex space-x-3">
+                        <button onclick="exportBowlerDatabase()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-download mr-2"></i>Export Database
+                        </button>
+                        <button onclick="showAddBowlerModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                            <i class="fas fa-plus mr-2"></i>Add Bowler
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Database Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                                <i class="fas fa-users text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">Total Bowlers</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="totalBowlersCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                                <i class="fas fa-chart-line text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">Avg Bowling Average</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="avgBowlingAverage">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                                <i class="fas fa-trophy text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">Active Bowlers</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="activeBowlersCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                                <i class="fas fa-star text-white text-2xl"></i>
+                            </div>
+                            <div class="ml-5">
+                                <p class="text-sm font-medium text-gray-500">High Averages (200+)</p>
+                                <p class="text-2xl font-semibold text-gray-900" id="professionalCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2">
+                            <input type="text" id="bowlerDatabaseSearch" placeholder="Search by name, email, Discord, or Roblox..." class="w-full border border-gray-300 rounded-lg px-4 py-2" oninput="filterBowlerDatabase()">
+                        </div>
+                        <div>
+                            <select id="bowlerDatabaseSkillFilter" class="w-full border border-gray-300 rounded-lg px-4 py-2" onchange="filterBowlerDatabase()">
+                                <option value="">All Skill Levels</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="professional">Professional</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="bowlerDatabaseStatusFilter" class="w-full border border-gray-300 rounded-lg px-4 py-2" onchange="filterBowlerDatabase()">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bowler Database Table -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discord</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roblox</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tournaments</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bowlerDatabaseTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Bowlers will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Registrations Section (Bowlers Only) -->
+            <div id="myRegistrations" class="section hidden">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">My Tournament Registrations</h2>
+                
+                <div id="myRegistrationsList" class="space-y-6">
+                    <!-- Registrations will be added here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Create Tournament Modal -->
+    <div id="createTournamentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 class="text-2xl font-bold mb-4">Create New Tournament</h3>
+            <form id="createTournamentForm" onsubmit="createTournament(event)">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tournament Name</label>
+                        <input type="text" id="tournamentName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tournament Format</label>
+                        <select id="tournamentFormat" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="single-elimination">Single Elimination (Stepladder)</option>
+                            <option value="double-elimination">Double Elimination</option>
+                            <option value="round-robin">Round Robin (Baker Format)</option>
+                            <option value="match-play">Match Play</option>
+                            <option value="scratch">Scratch Tournament</option>
+                            <option value="handicap">Handicap Tournament</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                        <input type="date" id="tournamentStartDate" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Registration Deadline</label>
+                        <input type="datetime-local" id="tournamentRegistrationDeadline" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Participants</label>
+                        <input type="number" id="tournamentMaxParticipants" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="tournamentDescription" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('createTournamentModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Tournament</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Participant Modal -->
+    <div id="participantModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-4">Add Participant</h3>
+            <form id="participantForm" onsubmit="addParticipant(event)">
+                <div class="space-y-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                        <input type="text" id="participantName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="participantEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bowling Average</label>
+                        <input type="number" id="participantAverage" min="0" max="300" placeholder="e.g., 180" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Skill Level</label>
+                        <select id="participantSkillLevel" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="beginner">Beginner (0-120 avg)</option>
+                            <option value="intermediate">Intermediate (121-180 avg)</option>
+                            <option value="advanced">Advanced (181-220 avg)</option>
+                            <option value="professional">Professional (221+ avg)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('participantModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add Participant</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Prize Pool Modal -->
+    <div id="prizeModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 class="text-2xl font-bold mb-4">Configure Prize Pool</h3>
+            <form id="prizeForm" onsubmit="addPrizePool(event)">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tournament</label>
+                        <select id="prizeTournamentSelect" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="">Select Tournament</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Total Prize Pool</label>
+                        <input type="number" id="totalPrizePool" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Distribution Type</label>
+                    <select id="prizeDistributionType" onchange="updatePrizeDistribution()" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        <option value="standard">Standard (50/30/20)</option>
+                        <option value="top-heavy">Top Heavy (70/20/10)</option>
+                        <option value="balanced">Balanced (40/30/20/10)</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div id="prizeBreakdown" class="mb-4">
+                    <!-- Prize breakdown will be shown here -->
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('prizeModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Prize Pool</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sponsor Modal -->
+    <div id="sponsorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 class="text-2xl font-bold mb-4">Add Sponsor / Contract</h3>
+            <form id="sponsorForm" onsubmit="addSponsor(event)">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                        <input type="text" id="sponsorCompany" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Person</label>
+                        <input type="text" id="sponsorContact" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="sponsorEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sponsorship Amount</label>
+                        <input type="number" id="sponsorAmount" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contract Start</label>
+                        <input type="date" id="sponsorStartDate" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contract End</label>
+                        <input type="date" id="sponsorEndDate" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tournament Association</label>
+                    <select id="sponsorTournamentSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        <option value="">All Tournaments</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Benefits / Terms</label>
+                    <textarea id="sponsorBenefits" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('sponsorModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add Sponsor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <div class="text-center mb-6">
+                <i class="fas fa-trophy text-blue-600 text-5xl mb-4"></i>
+                <h2 class="text-3xl font-bold text-gray-900">Tournament Director</h2>
+                <p class="text-gray-600 mt-2">Sign in to manage your tournaments</p>
+            </div>
+            
+            <div id="loginFormContainer">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" id="loginEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input type="password" id="loginPassword" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors">
+                        Sign In
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">
+                        Don't have an account? 
+                        <button onclick="showSignupForm()" class="text-blue-600 hover:text-blue-700 font-medium">Sign Up</button>
+                    </p>
+                </div>
+            </div>
+
+            <div id="signupFormContainer" class="hidden">
+                <form id="signupForm" onsubmit="handleSignup(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input type="text" id="signupName" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" id="signupEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                            <select id="signupRole" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select Role</option>
+                                <option value="admin">Admin (Full Access)</option>
+                                <option value="director">Tournament Director (Manage Tournaments)</option>
+                                <option value="bowler">Bowler (View & Participate)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input type="password" id="signupPassword" required minlength="6" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                            <input type="password" id="signupConfirmPassword" required minlength="6" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors">
+                        Create Account
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">
+                        Already have an account? 
+                        <button onclick="showLoginForm()" class="text-blue-600 hover:text-blue-700 font-medium">Sign In</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bowler Tournament Registration Modal -->
+    <div id="bowlerRegistrationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-4">Register for Tournament</h3>
+            <form id="bowlerRegistrationForm" onsubmit="submitBowlerRegistration(event)">
+                <input type="hidden" id="regTournamentId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tournament</label>
+                        <input type="text" id="regTournamentName" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                        <input type="text" id="regBowlerName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="regBowlerEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Discord Username</label>
+                        <input type="text" id="regDiscordName" required placeholder="username#1234" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Roblox Username</label>
+                        <input type="text" id="regRobloxName" required placeholder="YourRobloxName" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bowling Average</label>
+                        <input type="number" id="regBowlingAverage" min="0" max="300" placeholder="e.g., 180" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Skill Level</label>
+                        <select id="regSkillLevel" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="">Select Skill Level</option>
+                            <option value="beginner">Beginner (0-120 avg)</option>
+                            <option value="intermediate">Intermediate (121-180 avg)</option>
+                            <option value="advanced">Advanced (181-220 avg)</option>
+                            <option value="professional">Professional (221+ avg)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        You will receive a confirmation email after registration.
+                    </p>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeModal('bowlerRegistrationModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Register</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Tournament Modal -->
+    <div id="editTournamentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 class="text-2xl font-bold mb-4">Edit Tournament</h3>
+            <form id="editTournamentForm" onsubmit="updateTournament(event)">
+                <input type="hidden" id="editTournamentId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tournament Name</label>
+                        <input type="text" id="editTournamentName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tournament Format</label>
+                        <select id="editTournamentFormat" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="single-elimination">Single Elimination (Stepladder)</option>
+                            <option value="double-elimination">Double Elimination</option>
+                            <option value="round-robin">Round Robin (Baker Format)</option>
+                            <option value="match-play">Match Play</option>
+                            <option value="scratch">Scratch Tournament</option>
+                            <option value="handicap">Handicap Tournament</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                        <input type="date" id="editTournamentStartDate" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Registration Deadline</label>
+                        <input type="datetime-local" id="editTournamentRegistrationDeadline" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Participants</label>
+                        <input type="number" id="editTournamentMaxParticipants" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select id="editTournamentStatus" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="upcoming">Upcoming</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="editTournamentDescription" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('editTournamentModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update Tournament</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Bowler to Database Modal -->
+    <div id="addBowlerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 class="text-2xl font-bold mb-4">Add Bowler to Database</h3>
+            <form id="addBowlerForm" onsubmit="addBowlerToDatabase(event)">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                        <input type="text" id="dbBowlerName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                        <input type="email" id="dbBowlerEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Discord Username</label>
+                        <input type="text" id="dbBowlerDiscord" placeholder="username#1234" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Roblox Username</label>
+                        <input type="text" id="dbBowlerRoblox" placeholder="YourRobloxName" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bowling Average</label>
+                        <input type="number" id="dbBowlerAverage" min="0" max="300" placeholder="e.g., 180" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                        <select id="dbBowlerStatus" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea id="dbBowlerNotes" rows="3" placeholder="Additional information about the bowler..." class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('addBowlerModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add to Database</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Bowler Database Modal -->
+    <div id="editBowlerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+            <h3 class="text-2xl font-bold mb-4">Edit Bowler Information</h3>
+            <form id="editBowlerForm" onsubmit="updateBowlerInDatabase(event)">
+                <input type="hidden" id="editDbBowlerId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                        <input type="text" id="editDbBowlerName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                        <input type="email" id="editDbBowlerEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Discord Username</label>
+                        <input type="text" id="editDbBowlerDiscord" placeholder="username#1234" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Roblox Username</label>
+                        <input type="text" id="editDbBowlerRoblox" placeholder="YourRobloxName" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bowling Average</label>
+                        <input type="number" id="editDbBowlerAverage" min="0" max="300" placeholder="e.g., 180" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                        <select id="editDbBowlerStatus" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea id="editDbBowlerNotes" rows="3" placeholder="Additional information about the bowler..." class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal('editBowlerModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update Bowler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Bowler Details Modal -->
+    <div id="viewBowlerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-3xl font-bold text-gray-900">Bowler Profile</h3>
+                <button onclick="closeModal('viewBowlerModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Bowler Header Card -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 mb-6 text-white">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white rounded-full p-4">
+                        <i class="fas fa-bowling-ball text-blue-600 text-4xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 id="viewBowlerName" class="text-2xl font-bold mb-1">Bowler Name</h4>
+                        <p id="viewBowlerEmail" class="text-blue-100">email@example.com</p>
+                    </div>
+                    <div class="text-right">
+                        <div id="viewBowlerStatus" class="inline-block px-4 py-2 rounded-full bg-white text-blue-600 font-semibold text-sm">
+                            Active
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-green-600 font-medium mb-1">Bowling Average</p>
+                            <p id="viewBowlerAverage" class="text-3xl font-bold text-green-700">180</p>
+                        </div>
+                        <div class="bg-green-200 rounded-full p-3">
+                            <i class="fas fa-chart-line text-green-700 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-purple-600 font-medium mb-1">Tournaments</p>
+                            <p id="viewBowlerTournaments" class="text-3xl font-bold text-purple-700">5</p>
+                        </div>
+                        <div class="bg-purple-200 rounded-full p-3">
+                            <i class="fas fa-trophy text-purple-700 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-orange-600 font-medium mb-1">Member Since</p>
+                            <p id="viewBowlerCreated" class="text-lg font-bold text-orange-700">Jan 2025</p>
+                        </div>
+                        <div class="bg-orange-200 rounded-full p-3">
+                            <i class="fas fa-calendar text-orange-700 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gaming Profiles -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-gamepad text-blue-600 mr-2"></i>
+                    Gaming Profiles
+                </h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-100 rounded-lg p-3">
+                                <i class="fab fa-discord text-indigo-600 text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Discord Username</p>
+                                <p id="viewBowlerDiscord" class="text-sm font-semibold text-gray-900">username#1234</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-red-100 rounded-lg p-3">
+                                <i class="fas fa-cube text-red-600 text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Roblox Username</p>
+                                <p id="viewBowlerRoblox" class="text-sm font-semibold text-gray-900">RobloxUser</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200 mb-6">
+                <h5 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                    <i class="fas fa-sticky-note text-yellow-600 mr-2"></i>
+                    Notes
+                </h5>
+                <p id="viewBowlerNotes" class="text-gray-700 whitespace-pre-wrap">No notes available</p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-history text-gray-600 mr-2"></i>
+                    Activity Timeline
+                </h5>
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-blue-100 rounded-full p-2 mt-1">
+                            <i class="fas fa-user-plus text-blue-600 text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">Profile Created</p>
+                            <p id="viewBowlerCreatedFull" class="text-xs text-gray-500">January 15, 2025 at 10:30 AM</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-green-100 rounded-full p-2 mt-1">
+                            <i class="fas fa-edit text-green-600 text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">Last Updated</p>
+                            <p id="viewBowlerUpdated" class="text-xs text-gray-500">January 20, 2025 at 3:45 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                <button onclick="closeModal('viewBowlerModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    Close
+                </button>
+                <button onclick="editBowlerFromView()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    <i class="fas fa-edit mr-2"></i>Edit Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Tournament Bowlers Modal -->
+    <div id="manageBowlersModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900">Manage Tournament Bowlers</h3>
+                    <p id="manageBowlersTournamentName" class="text-gray-600 mt-1">Tournament Name</p>
+                </div>
+                <button onclick="closeModal('manageBowlersModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Current Bowlers -->
+            <div class="mb-6">
+                <h4 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                    <i class="fas fa-users text-green-600 mr-2"></i>
+                    Selected Bowlers (<span id="selectedBowlersCount">0</span>)
+                </h4>
+                <div id="selectedBowlersList" class="bg-gray-50 rounded-lg p-4 min-h-[100px]">
+                    <p class="text-gray-500 text-center py-4">No bowlers selected yet</p>
+                </div>
+            </div>
+
+            <!-- Available Bowlers -->
+            <div>
+                <h4 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                    <i class="fas fa-database text-blue-600 mr-2"></i>
+                    Available Bowlers from Database
+                </h4>
+                <div class="mb-4">
+                    <input type="text" id="manageBowlersSearch" placeholder="Search bowlers..." class="w-full border border-gray-300 rounded-lg px-4 py-2" oninput="filterAvailableBowlers()">
+                </div>
+                <div id="availableBowlersList" class="space-y-2 max-h-[400px] overflow-y-auto">
+                    <!-- Available bowlers will be listed here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                <button onclick="closeModal('manageBowlersModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    Close
+                </button>
+                <button onclick="saveTournamentBowlers()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Tournament Details Modal -->
+    <div id="viewTournamentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-3xl font-bold text-gray-900">Tournament Details</h3>
+                <button onclick="closeModal('viewTournamentModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Tournament Header -->
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 mb-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-white rounded-full p-4">
+                            <i class="fas fa-trophy text-purple-600 text-4xl"></i>
+                        </div>
+                        <div>
+                            <h4 id="viewTournamentName" class="text-3xl font-bold mb-2">Tournament Name</h4>
+                            <p id="viewTournamentFormat" class="text-purple-100 text-lg">Single Elimination</p>
+                        </div>
+                    </div>
+                    <div id="viewTournamentStatusBadge" class="px-4 py-2 rounded-full bg-white text-purple-600 font-semibold">
+                        Upcoming
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                    <div class="text-center">
+                        <i class="fas fa-users text-blue-600 text-2xl mb-2"></i>
+                        <p class="text-sm text-blue-600 font-medium mb-1">Registered</p>
+                        <p id="viewTournamentRegistered" class="text-2xl font-bold text-blue-700">0 / 32</p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                    <div class="text-center">
+                        <i class="fas fa-calendar text-green-600 text-2xl mb-2"></i>
+                        <p class="text-sm text-green-600 font-medium mb-1">Start Date</p>
+                        <p id="viewTournamentStartDate" class="text-lg font-bold text-green-700">Jan 15, 2025</p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                    <div class="text-center">
+                        <i class="fas fa-clock text-orange-600 text-2xl mb-2"></i>
+                        <p class="text-sm text-orange-600 font-medium mb-1">Deadline</p>
+                        <p id="viewTournamentDeadline" class="text-sm font-bold text-orange-700">Jan 10, 11:59 PM</p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+                    <div class="text-center">
+                        <i class="fas fa-sitemap text-red-600 text-2xl mb-2"></i>
+                        <p class="text-sm text-red-600 font-medium mb-1">Bracket</p>
+                        <p id="viewTournamentBracket" class="text-lg font-bold text-red-700">Not Generated</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <h5 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                    Description
+                </h5>
+                <p id="viewTournamentDescription" class="text-gray-700">No description provided</p>
+            </div>
+
+            <!-- Registered Bowlers -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-list text-purple-600 mr-2"></i>
+                    Registered Bowlers
+                </h5>
+                <div id="viewTournamentBowlersList" class="space-y-2">
+                    <p class="text-gray-500 text-center py-4">No registrations yet</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                <button onclick="closeModal('viewTournamentModal')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    Close
+                </button>
+                <button onclick="editTournamentFromView()" class="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-medium">
+                    <i class="fas fa-edit mr-2"></i>Edit Tournament
+                </button>
+                <button onclick="viewTournamentBracket()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium">
+                    <i class="fas fa-sitemap mr-2"></i>View Bracket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enter Match Score Modal -->
+    <div id="scoreModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-4">Enter Match Score</h3>
+            <form id="scoreForm" onsubmit="submitMatchScore(event)">
+                <input type="hidden" id="scoreMatchId">
+                <input type="hidden" id="scoreTournamentId">
+                <input type="hidden" id="scoreRoundIndex">
+                <input type="hidden" id="scoreMatchIndex">
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm font-medium text-gray-700 mb-2">Match Details</p>
+                        <div id="scoreMatchDetails" class="text-sm text-gray-600">
+                            <!-- Match details will be inserted here -->
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <span id="scorePlayer1Name">Player 1</span> Score
+                        </label>
+                        <input type="number" id="scorePlayer1" min="0" max="300" required class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Enter score">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <span id="scorePlayer2Name">Player 2</span> Score
+                        </label>
+                        <input type="number" id="scorePlayer2" min="0" max="300" required class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Enter score">
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            The winner will automatically advance to the next round.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeModal('scoreModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Submit Score</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+        <!-- Toasts will be dynamically added here -->
+    </div>
+
+    <!-- Update Available Modal -->
+    <div id="updateModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center z-[100]">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <div class="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-sync-alt text-blue-600 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Update Available!</h3>
+                <p class="text-gray-600">A new version of the Tournament Director is available.</p>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6">
+                <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                    What's New:
+                </h4>
+                <ul id="updateFeaturesList" class="text-sm text-gray-700 space-y-1">
+                    <li>• Enhanced tournament management</li>
+                    <li>• Improved bowler database</li>
+                    <li>• Bug fixes and performance improvements</li>
+                </ul>
+            </div>
+
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start space-x-2">
+                    <i class="fas fa-shield-alt text-green-600 mt-1"></i>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-green-900">Your Data is Safe</p>
+                        <p class="text-xs text-green-700">All your tournaments and bowlers will be preserved after updating.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="applyUpdate()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transform transition hover:scale-105">
+                    <i class="fas fa-download mr-2"></i>Update Now
+                </button>
+                <button onclick="dismissUpdate()" class="w-full border-2 border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50">
+                    Remind Me Later
+                </button>
+            </div>
+
+            <p class="text-xs text-gray-500 text-center mt-4">
+                Current Version: <span id="currentVersion">1.0.0</span> → New Version: <span id="newVersion">1.1.0</span>
+            </p>
+        </div>
+    </div>
+
+    <script src="tournament.js"></script>
+</body>
+</html>
